@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Management System</title>
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        body {
+            background-color: #007bff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            color: black;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #0056b3;
+            color: white;
+            padding: 40px;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .header img {
+            position: absolute;
+            left: 20px;
+            height: 100px; /* Adjust the height as needed */
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        h2 {
+            color: #007bff;
+        }
+        input, label, select {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .leave-card {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #otherReason {
+            display: none;
+            margin-top: 10px;
+        }
+        #endDateContainer {
+            display: none;
+        }
+        #rejectReasonContainer {
+            display: none;
+            margin-top: 10px;
+        }
+        #halfDayTimeContainer {
+            display: block;
+        }
+        .change-password-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #28a745;
+        }
+        .change-password-btn:hover {
+            background-color: #218838;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .public-holidays-container {
+            margin-top: 20px;
+        }
+        .public-holiday-card {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body onload="initializeSystem()">
+
+    <!-- Header Section -->
+    <div class="header">
+        <img src="data:image/jpeg;base64,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">
+        The Archipelago Group Leave Management System
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal-overlay" id="changePasswordOverlay"></div>
+    <div class="modal" id="changePasswordModal">
+        <h2>Change Password</h2>
+        <input type="password" id="currentPassword" placeholder="Current Password">
+        <input type="password" id="newPassword" placeholder="New Password">
+        <input type="password" id="confirmNewPassword" placeholder="Confirm New Password">
+        <button onclick="changePassword()">Change Password</button>
+        <button onclick="closeChangePasswordModal()">Cancel</button>
+        <p id="passwordMessage"></p>
+    </div>
+
+    <div class="container" id="loginPage">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <p id="message"></p>
+    </div>
+
+    <div class="container" id="userPage" style="display: none;">
+        <button class="change-password-btn" onclick="openChangePasswordModal()">Change Password</button>
+        <h2>Apply for Leave</h2>
+        <p><b>Remaining Leave Days:</b> <span id="remainingLeaves">20</span></p>
+
+        <!-- Leave Application Form -->
+        <label>Reason for Leave:</label>
+        <select id="leaveReason" onchange="toggleOtherReason()">
+            <option value="Medical">Medical</option>
+            <option value="Family Emergencies">Family Emergencies</option>
+            <option value="Vacation">Vacation</option>
+            <option value="Others">Others</option>
+        </select>
+        <input type="text" id="otherReason" placeholder="Please specify the reason">
+        <label>Leave Type:</label>
+        <select id="leaveType" onchange="toggleLeaveTypeFields()">
+            <option value="Half Day">Half Day</option>
+            <option value="Full Day">Full Day</option>
+        </select>
+        <div id="halfDayTimeContainer">
+            <label>Half Day Time:</label>
+            <select id="halfDayTime">
+                <option value="Morning">Morning</option>
+                <option value="Afternoon">Afternoon</option>
+            </select>
+        </div>
+
+        <!-- Calendar for Start and End Dates -->
+        <div class="calendar-container">
+            <label>Starting Date:</label>
+            <input type="text" id="startDate" placeholder="Select Start Date">
+            <div id="endDateContainer">
+                <label>Ending Date:</label>
+                <input type="text" id="endDate" placeholder="Select End Date">
+            </div>
+        </div>
+
+        <label>Upload Documents:</label>
+        <input type="file" id="documents" multiple>
+        <button onclick="applyLeave()">Submit</button>
+        <p id="userMessage"></p>
+
+        <h3>Your Leave Requests</h3>
+        <div id="employeeRequests"></div>
+
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <div class="container" id="adminPage" style="display: none;">
+        <button class="change-password-btn" onclick="openChangePasswordModal()">Change Password</button>
+        <h2>Admin Panel</h2>
+        <h3>Leave Requests</h3>
+        <div id="leaveRequests"></div>
+        <h3>Employee Leave Balances</h3>
+        <div id="employeeLeaveBalances"></div>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <div class="container" id="superAdminPage" style="display: none;">
+        <button class="change-password-btn" onclick="openChangePasswordModal()">Change Password</button>
+        <h2>Super Admin Panel</h2>
+        <label>Select Department:</label>
+        <select id="departmentSelect" onchange="loadSuperAdminData()">
+            <option value="Department 1">Department 1</option>
+            <option value="Department 2">Department 2</option>
+            <option value="Department 3">Department 3</option>
+            <option value="Department 4">Department 4</option>
+        </select>
+        <h3>Leave Requests</h3>
+        <div id="allLeaveRequests"></div>
+        <h3>Employee Leave Balances</h3>
+        <div id="allEmployeeLeaveBalances"></div>
+
+        <!-- Public Holidays Management -->
+        <div class="public-holidays-container">
+            <h3>Public Holidays</h3>
+            <input type="date" id="publicHolidayDate">
+            <input type="text" id="publicHolidayName" placeholder="Holiday Name">
+            <button onclick="addPublicHoliday()">Add Public Holiday</button>
+            <div id="publicHolidaysList"></div>
+        </div>
+
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        let users = [
+            { username: "admin1", password: "admin123", role: "admin", department: "Department 1" },
+            { username: "employee1", password: "pass123", role: "employee", department: "Department 1" },
+            { username: "employee2", password: "pass456", role: "employee", department: "Department 1" },
+            { username: "admin2", password: "admin123", role: "admin", department: "Department 2" },
+            { username: "employee3", password: "pass123", role: "employee", department: "Department 2" },
+            { username: "employee4", password: "pass456", role: "employee", department: "Department 2" },
+            { username: "admin3", password: "admin123", role: "admin", department: "Department 3" },
+            { username: "employee5", password: "pass123", role: "employee", department: "Department 3" },
+            { username: "employee6", password: "pass456", role: "employee", department: "Department 3" },
+            { username: "admin4", password: "admin123", role: "admin", department: "Department 4" },
+            { username: "employee7", password: "pass123", role: "employee", department: "Department 4" },
+            { username: "employee8", password: "pass456", role: "employee", department: "Department 4" },
+            { username: "superadmin", password: "superadmin123", role: "superadmin", department: "All" }
+        ];
+
+        function initializeSystem() {
+            // Clear existing data in localStorage
+            localStorage.removeItem("leaveRequests");
+            localStorage.removeItem("leaveBalances");
+            localStorage.removeItem("publicHolidays");
+
+            // Initialize leaveRequests, leaveBalances, and publicHolidays if they don't exist
+            if (!localStorage.getItem("leaveRequests")) {
+                localStorage.setItem("leaveRequests", JSON.stringify([]));
+            }
+            if (!localStorage.getItem("leaveBalances")) {
+                let leaveBalances = {};
+                users.forEach(user => {
+                    if (user.role === "employee") {
+                        leaveBalances[user.username] = 20;
+                    }
+                });
+                localStorage.setItem("leaveBalances", JSON.stringify(leaveBalances));
+            }
+            if (!localStorage.getItem("publicHolidays")) {
+                localStorage.setItem("publicHolidays", JSON.stringify([]));
+            }
+
+            loadPage();
+        }
+
+        function login() {
+            let username = document.getElementById("username").value;
+            let password = document.getElementById("password").value;
+            let user = users.find(u => u.username === username && u.password === password);
+
+            if (user) {
+                localStorage.setItem("loggedInUser", JSON.stringify(user));
+                loadPage();
+            } else {
+                document.getElementById("message").innerText = "Invalid credentials. Try again.";
+            }
+        }
+
+        function loadPage() {
+            let user = JSON.parse(localStorage.getItem("loggedInUser"));
+
+            if (!user) {
+                document.getElementById("loginPage").style.display = "block";
+                document.getElementById("userPage").style.display = "none";
+                document.getElementById("adminPage").style.display = "none";
+                document.getElementById("superAdminPage").style.display = "none";
+            } else if (user.role === "admin") {
+                document.getElementById("loginPage").style.display = "none";
+                document.getElementById("userPage").style.display = "none";
+                document.getElementById("adminPage").style.display = "block";
+                document.getElementById("superAdminPage").style.display = "none";
+                loadLeaveRequests(user.department);
+                loadEmployeeLeaveBalances(user.department);
+            } else if (user.role === "superadmin") {
+                document.getElementById("loginPage").style.display = "none";
+                document.getElementById("userPage").style.display = "none";
+                document.getElementById("adminPage").style.display = "none";
+                document.getElementById("superAdminPage").style.display = "block";
+                loadSuperAdminData();
+                loadPublicHolidays();
+            } else {
+                document.getElementById("loginPage").style.display = "none";
+                document.getElementById("userPage").style.display = "block";
+                document.getElementById("adminPage").style.display = "none";
+                document.getElementById("superAdminPage").style.display = "none";
+                updateRemainingLeaves(user.username);
+                loadEmployeeRequests(user.username);
+                initializeCalendar();
+                // Make sure half day container is visible if half day is selected by default
+                toggleLeaveTypeFields();
+            }
+        }
+
+        function initializeCalendar() {
+            let publicHolidays = JSON.parse(localStorage.getItem("publicHolidays"));
+            let disabledDates = publicHolidays.map(holiday => holiday.date);
+
+            flatpickr("#startDate", {
+                dateFormat: "Y-m-d",
+                disable: disabledDates,
+                onChange: function(selectedDates, dateStr, instance) {
+                    document.getElementById("startDate").value = dateStr;
+                }
+            });
+
+            flatpickr("#endDate", {
+                dateFormat: "Y-m-d",
+                disable: disabledDates,
+                onChange: function(selectedDates, dateStr, instance) {
+                    document.getElementById("endDate").value = dateStr;
+                }
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem("loggedInUser");
+            loadPage();
+        }
+
+        function toggleOtherReason() {
+            let leaveReason = document.getElementById("leaveReason").value;
+            let otherReasonInput = document.getElementById("otherReason");
+            if (leaveReason === "Others") {
+                otherReasonInput.style.display = "block";
+            } else {
+                otherReasonInput.style.display = "none";
+            }
+        }
+
+        function toggleLeaveTypeFields() {
+            let leaveType = document.getElementById("leaveType").value;
+            let endDateContainer = document.getElementById("endDateContainer");
+            let halfDayTimeContainer = document.getElementById("halfDayTimeContainer");
+
+            if (leaveType === "Half Day") {
+                endDateContainer.style.display = "none";
+                halfDayTimeContainer.style.display = "block";
+            } else {
+                endDateContainer.style.display = "block";
+                halfDayTimeContainer.style.display = "none";
+            }
+        }
+
+        function applyLeave() {
+            let user = JSON.parse(localStorage.getItem("loggedInUser"));
+            let leaveReason = document.getElementById("leaveReason").value;
+            let otherReason = document.getElementById("otherReason").value;
+            let leaveType = document.getElementById("leaveType").value;
+            let halfDayTime = leaveType === "Half Day" ? document.getElementById("halfDayTime").value : null;
+            let startDate = document.getElementById("startDate").value;
+            let endDate = leaveType === "Half Day" ? startDate : document.getElementById("endDate").value;
+            let documents = document.getElementById("documents").files;
+
+            if (leaveReason === "Others" && otherReason.trim() === "") {
+                document.getElementById("userMessage").innerText = "Please specify the reason for leave.";
+                return;
+            }
+
+            if (!startDate) {
+                document.getElementById("userMessage").innerText = "Please select a start date.";
+                return;
+            }
+
+            if (leaveType === "Full Day" && !endDate) {
+                document.getElementById("userMessage").innerText = "Please select an end date.";
+                return;
+            }
+
+            if (documents.length === 0) {
+                document.getElementById("userMessage").innerText = "Please upload supporting documents.";
+                return;
+            }
+
+            // Check if the selected dates overlap with public holidays
+            let publicHolidays = JSON.parse(localStorage.getItem("publicHolidays"));
+            let isHoliday = publicHolidays.some(holiday => {
+                let holidayDate = new Date(holiday.date);
+                let start = new Date(startDate);
+                let end = new Date(endDate);
+                return holidayDate >= start && holidayDate <= end;
+            });
+
+            if (isHoliday) {
+                document.getElementById("userMessage").innerText = "Leave cannot be applied on public holidays.";
+                return;
+            }
+
+            let leaveBalances = JSON.parse(localStorage.getItem("leaveBalances"));
+            let remainingDays = leaveBalances[user.username];
+
+            let daysRequested = leaveType === "Half Day" ? 0.5 : (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24) + 1;
+
+            if (daysRequested > remainingDays) {
+                document.getElementById("userMessage").innerText = "Not enough leave days available.";
+                return;
+            }
+
+            let leaveRequests = JSON.parse(localStorage.getItem("leaveRequests"));
+            leaveRequests.push({
+                id: Date.now(),
+                user: user.username,
+                department: user.department,
+                leaveReason: leaveReason === "Others" ? otherReason : leaveReason,
+                leaveType,
+                halfDayTime,
+                startDate,
+                endDate,
+                status: "Pending",
+                daysRequested,
+                documents: Array.from(documents).map(file => file.name), // Store file names
+                rejectReason: "" // Initialize reject reason
+            });
+            localStorage.setItem("leaveRequests", JSON.stringify(leaveRequests));
+
+            document.getElementById("userMessage").innerText = "Leave request submitted!";
+            loadLeaveRequests(user.department);
+        }
+
+        function loadLeaveRequests(department) {
+            let leaveRequests = JSON.parse(localStorage.getItem("leaveRequests"));
+            let leaveRequestsContainer = document.getElementById("leaveRequests");
+            leaveRequestsContainer.innerHTML = "";
+
+            let filteredRequests = leaveRequests.filter(request => request.department === department);
+
+            filteredRequests.forEach(request => {
+                let leaveCard = document.createElement("div");
+                leaveCard.className = "leave-card";
+                leaveCard.innerHTML = `
+                    <p><b>${request.user}</b>: ${request.leaveReason} (${request.startDate} - ${request.endDate}) - <b>${request.status}</b></p>
+                    <p><b>Leave Type:</b> ${request.leaveType} ${request.leaveType === "Half Day" ? `(${request.halfDayTime})` : ""}</p>
+                    ${request.documents ? `<p><b>Documents:</b> ${request.documents.map(doc => `<a href="#" onclick="openDocument('${doc}')">${doc}</a>`).join(", ")}</p>` : ""}
+                    ${request.status === "Pending" && JSON.parse(localStorage.getItem("loggedInUser")).role === "admin" ? `
+                        <button onclick="approveLeave(${request.id})">Approve</button>
+                        <button onclick="showRejectReasonBox(${request.id})" style="background-color: red;">Reject</button>
+                    ` : ""}
+                    ${request.status === "Rejected" ? `<p><b>Rejection Reason:</b> ${request.rejectReason}</p>` : ""}
+                `;
+                leaveRequestsContainer.appendChild(leaveCard);
+            });
+
+            if (document.getElementById("employeeRequests")) {
+                loadEmployeeRequests(JSON.parse(localStorage.getItem("loggedInUser")).username);
+            }
+        }
+
+        function openDocument(docName) {
+            alert(`Opening document: ${docName}`); // Replace with actual file opening logic
+        }
+
+        function showRejectReasonBox(id) {
+            let rejectReason = prompt("Please enter the reason for rejection:");
+            if (rejectReason !== null && rejectReason.trim() !== "") {
+                rejectLeave(id, rejectReason);
+            }
+        }
+
+        function rejectLeave(id, reason) {
+            let leaveRequests = JSON.parse(localStorage.getItem("leaveRequests"));
+            let request = leaveRequests.find(req => req.id === id);
+
+            if (request) {
+                request.status = "Rejected";
+                request.rejectReason = reason;
+                localStorage.setItem("leaveRequests", JSON.stringify(leaveRequests));
+                loadLeaveRequests(request.department);
+            }
+        }
+
+        function approveLeave(id) {
+            let leaveRequests = JSON.parse(localStorage.getItem("leaveRequests"));
+            let leaveBalances = JSON.parse(localStorage.getItem("leaveBalances"));
+            let request = leaveRequests.find(req => req.id === id);
+
+            if (request) {
+                request.status = "Approved";
+                leaveBalances[request.user] -= request.daysRequested;
+                localStorage.setItem("leaveRequests", JSON.stringify(leaveRequests));
+                localStorage.setItem("leaveBalances", JSON.stringify(leaveBalances));
+                loadLeaveRequests(request.department);
+                loadEmployeeLeaveBalances(request.department);
+                updateRemainingLeaves(request.user);
+            }
+        }
+
+        function updateRemainingLeaves(username) {
+            let leaveBalances = JSON.parse(localStorage.getItem("leaveBalances"));
+            document.getElementById("remainingLeaves").innerText = leaveBalances[username];
+        }
+
+        function loadEmployeeRequests(username) {
+            let leaveRequests = JSON.parse(localStorage.getItem("leaveRequests"));
+            let employeeRequestsContainer = document.getElementById("employeeRequests");
+            employeeRequestsContainer.innerHTML = "";
+
+            let userRequests = leaveRequests.filter(req => req.user === username);
+
+            userRequests.forEach(request => {
+                let leaveCard = document.createElement("div");
+                leaveCard.className = "leave-card";
+                leaveCard.innerHTML = `
+                    <p><b>${request.leaveReason}</b>: ${request.startDate} - ${request.endDate} - <b>${request.status}</b></p>
+                    <p><b>Leave Type:</b> ${request.leaveType} ${request.leaveType === "Half Day" ? `(${request.halfDayTime})` : ""}</p>
+                    ${request.status === "Rejected" ? `<p><b>Rejection Reason:</b> ${request.rejectReason}</p>` : ""}
+                    ${request.documents ? `<p><b>Documents:</b> ${request.documents.map(doc => `<a href="#" onclick="openDocument('${doc}')">${doc}</a>`).join(", ")}</p>` : ""}
+                `;
+                employeeRequestsContainer.appendChild(leaveCard);
+            });
+        }
+
+        function loadEmployeeLeaveBalances(department) {
+            let leaveBalances = JSON.parse(localStorage.getItem("leaveBalances"));
+            let employeeLeaveBalancesContainer = document.getElementById("employeeLeaveBalances");
+            employeeLeaveBalancesContainer.innerHTML = "";
+
+            let departmentEmployees = users.filter(user => user.department === department && user.role === "employee");
+
+            departmentEmployees.forEach(employee => {
+                let balanceCard = document.createElement("div");
+                balanceCard.className = "leave-card";
+                balanceCard.innerHTML = `
+                    <p><b>${employee.username}</b>: ${leaveBalances[employee.username]} days remaining</p>
+                `;
+                employeeLeaveBalancesContainer.appendChild(balanceCard);
+            });
+        }
+
+        function loadSuperAdminData() {
+            let department = document.getElementById("departmentSelect").value;
+            let leaveRequests = JSON.parse(localStorage.getItem("leaveRequests"));
+            let leaveBalances = JSON.parse(localStorage.getItem("leaveBalances"));
+
+            // Load leave requests for the selected department
+            let allLeaveRequestsContainer = document.getElementById("allLeaveRequests");
+            allLeaveRequestsContainer.innerHTML = "";
+
+            let filteredRequests = leaveRequests.filter(request => request.department === department);
+
+            filteredRequests.forEach(request => {
+                let leaveCard = document.createElement("div");
+                leaveCard.className = "leave-card";
+                leaveCard.innerHTML = `
+                    <p><b>${request.user}</b>: ${request.leaveReason} (${request.startDate} - ${request.endDate}) - <b>${request.status}</b></p>
+                    <p><b>Leave Type:</b> ${request.leaveType} ${request.leaveType === "Half Day" ? `(${request.halfDayTime})` : ""}</p>
+                    ${request.documents ? `<p><b>Documents:</b> ${request.documents.map(doc => `<a href="#" onclick="openDocument('${doc}')">${doc}</a>`).join(", ")}</p>` : ""}
+                    ${request.status === "Rejected" ? `<p><b>Rejection Reason:</b> ${request.rejectReason}</p>` : ""}
+                `;
+                allLeaveRequestsContainer.appendChild(leaveCard);
+            });
+
+            // Load employee leave balances for the selected department
+            let allEmployeeLeaveBalancesContainer = document.getElementById("allEmployeeLeaveBalances");
+            allEmployeeLeaveBalancesContainer.innerHTML = "";
+
+            let departmentEmployees = users.filter(user => user.department === department && user.role === "employee");
+
+            departmentEmployees.forEach(employee => {
+                let balanceCard = document.createElement("div");
+                balanceCard.className = "leave-card";
+                balanceCard.innerHTML = `
+                    <p><b>${employee.username}</b>: ${leaveBalances[employee.username]} days remaining</p>
+                `;
+                allEmployeeLeaveBalancesContainer.appendChild(balanceCard);
+            });
+        }
+
+        function addPublicHoliday() {
+            let date = document.getElementById("publicHolidayDate").value;
+            let name = document.getElementById("publicHolidayName").value;
+
+            if (!date || !name) {
+                alert("Please enter both date and name for the public holiday.");
+                return;
+            }
+
+            let publicHolidays = JSON.parse(localStorage.getItem("publicHolidays"));
+            publicHolidays.push({ date, name });
+            localStorage.setItem("publicHolidays", JSON.stringify(publicHolidays));
+
+            loadPublicHolidays();
+            document.getElementById("publicHolidayDate").value = "";
+            document.getElementById("publicHolidayName").value = "";
+        }
+
+        function loadPublicHolidays() {
+            let publicHolidays = JSON.parse(localStorage.getItem("publicHolidays"));
+            let publicHolidaysList = document.getElementById("publicHolidaysList");
+            publicHolidaysList.innerHTML = "";
+
+            publicHolidays.forEach(holiday => {
+                let holidayCard = document.createElement("div");
+                holidayCard.className = "public-holiday-card";
+                holidayCard.innerHTML = `<p><b>${holiday.date}</b>: ${holiday.name}</p>`;
+                publicHolidaysList.appendChild(holidayCard);
+            });
+        }
+
+        function openChangePasswordModal() {
+            // Display the modal and overlay
+            document.getElementById("changePasswordModal").style.display = "block";
+            document.getElementById("changePasswordOverlay").style.display = "block";
+            
+            // Clear all input fields
+            document.getElementById("currentPassword").value = "";
+            document.getElementById("newPassword").value = "";
+            document.getElementById("confirmNewPassword").value = "";
+            
+            // Clear any previous messages
+            document.getElementById("passwordMessage").innerText = "";
+        }
+
+        function closeChangePasswordModal() {
+            // Clear all input fields
+            document.getElementById("currentPassword").value = "";
+            document.getElementById("newPassword").value = "";
+            document.getElementById("confirmNewPassword").value = "";
+            
+            // Clear any previous messages
+            document.getElementById("passwordMessage").innerText = "";
+            
+            // Hide the modal and overlay
+            document.getElementById("changePasswordModal").style.display = "none";
+            document.getElementById("changePasswordOverlay").style.display = "none";
+        }
+
+        function changePassword() {
+            let user = JSON.parse(localStorage.getItem("loggedInUser"));
+            let currentPassword = document.getElementById("currentPassword").value;
+            let newPassword = document.getElementById("newPassword").value;
+            let confirmNewPassword = document.getElementById("confirmNewPassword").value;
+
+            if (currentPassword !== user.password) {
+                document.getElementById("passwordMessage").innerText = "Current password is incorrect.";
+                return;
+            }
+
+            if (newPassword !== confirmNewPassword) {
+                document.getElementById("passwordMessage").innerText = "New passwords do not match.";
+                return;
+            }
+
+            // Update the user's password
+            let userIndex = users.findIndex(u => u.username === user.username);
+            users[userIndex].password = newPassword;
+            localStorage.setItem("loggedInUser", JSON.stringify(users[userIndex]));
+
+            document.getElementById("passwordMessage").innerText = "Password changed successfully!";
+            setTimeout(closeChangePasswordModal, 2000); // Close modal after 2 seconds for user to see success message
+        }
+    </script>
+</body>
+</html>
